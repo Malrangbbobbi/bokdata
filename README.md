@@ -11,7 +11,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
-[![CI](https://github.com/Malarngbbobbi/bokdata/actions/workflows/ci.yml/badge.svg)](https://github.com/Malarngbbobbi/bokdata/actions)
+[![CI](https://github.com/Malarngbbobbi/bokdata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Malarngbbobbi/bokdata/actions)
 
 ### 설치
 
@@ -106,7 +106,7 @@ pytest
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
-[![CI](https://github.com/Malarngbbobbi/bokdata/actions/workflows/ci.yml/badge.svg)](https://github.com/Malarngbbobbi/bokdata/actions)
+[![CI](https://github.com/Malarngbbobbi/bokdata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Malarngbbobbi/bokdata/actions)
 
 ### Installation
 
