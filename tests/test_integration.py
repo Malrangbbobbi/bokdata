@@ -8,7 +8,10 @@ import pytest
 pytest.importorskip("requests")
 pytest.importorskip("bs4")
 
+pytestmark = pytest.mark.network
 
+
+@pytest.mark.network
 def test_get_list_single_year():
     from bokdata import MonetaryPolicy
 
@@ -18,6 +21,7 @@ def test_get_list_single_year():
     assert "download_url" in df.columns
 
 
+@pytest.mark.network
 def test_get_list_returns_dataframe():
     from bokdata import MonetaryPolicy
     import pandas as pd

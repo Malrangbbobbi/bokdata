@@ -52,3 +52,7 @@ target-version = "py310"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+markers = [
+    "network: 실제 네트워크(한국은행 사이트) 접속이 필요한 테스트",
+    "selenium: Selenium/ChromeDriver가 필요한 테스트",
+]

@@ -1,23 +1,19 @@
 """
 Selenium 기반 폴백 fetcher.
 requests 로 파일 링크를 파싱할 수 없을 때 사용.
+selenium 패키지가 설치돼 있지 않으면 ImportError 를 호출 시점에 발생시킨다.
 """
-import time
 import urllib.parse
 import re
-from typing import Optional
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from bokdata.monetary_policy.constants import LIST_URL, MENU_NO, MTG_SE, DOWNLOAD_URL
 
 
-def _build_driver(headless: bool = True) -> webdriver.Chrome:
+def _build_driver(headless: bool = True):
+    # lazy import — selenium 없는 환경에서 모듈 import 시 터지지 않도록
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+
     options = Options()
     if headless:
         options.add_argument("--headless=new")
@@ -32,6 +28,10 @@ def _build_driver(headless: bool = True) -> webdriver.Chrome:
 
 
 def fetch_year_list_selenium(year: int, doc_type: str, headless: bool = True) -> list[dict]:
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.ui import WebDriverWait
+
     mtg_se = MTG_SE[doc_type]
     url = LIST_URL.format(mtg_se=mtg_se, menu_no=MENU_NO, year=year)
 
@@ -42,7 +42,6 @@ def fetch_year_list_selenium(year: int, doc_type: str, headless: bool = True) ->
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "table tbody tr"))
         )
-        # display:none 레이어도 DOM 에 존재하므로 find_elements 로 취득
         trs = driver.find_elements(By.CSS_SELECTOR, "table tbody tr")
         for tr in trs:
             tds = tr.find_elements(By.TAG_NAME, "td")
@@ -65,6 +64,8 @@ def fetch_year_list_selenium(year: int, doc_type: str, headless: bool = True) ->
 
 
 def _extract_files_selenium(tr_element) -> list[dict]:
+    from selenium.webdriver.common.by import By
+
     files = []
     anchors = tr_element.find_elements(By.CSS_SELECTOR, ".fileGoupBox li a")
     for a in anchors:
