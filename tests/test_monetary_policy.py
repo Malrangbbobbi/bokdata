@@ -30,75 +30,61 @@ def test_parse_date():
     assert _parse_date("unknown") == "unknown"
 
 
-def test_parse_list_html_doctype():
-    """thead 컬럼 헤더 기준으로 doc_type이 올바르게 분류되는지 검증."""
+def test_parse_date_from_th_direct_text():
+    """th[scope="row"] 에 파일박스가 중첩돼도 직접 텍스트에서 날짜를 파싱한다."""
     from bokdata.monetary_policy.fetcher import _parse_list_html
 
     html = """
-    <table>
-      <thead>
-        <tr>
-          <th>날짜</th>
-          <th>결정문</th>
-          <th>기자간담회</th>
-          <th>의사록</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">01월 14일(금)</th>
-          <td>
-            <div class="fileGoupBox"><ul><li>
-              <a href="?atchFileId=AAA&fileSn=0" title="결정문.pdf">결정문.pdf</a>
-            </li></ul></div>
-          </td>
-          <td>
-            <div class="fileGoupBox"><ul><li>
-              <a href="?atchFileId=BBB&fileSn=0" title="기자간담회.pdf">기자간담회.pdf</a>
-            </li></ul></div>
-          </td>
-          <td>
-            <div class="fileGoupBox"><ul><li>
-              <a href="?atchFileId=CCC&fileSn=0" title="의사록.pdf">의사록.pdf</a>
-            </li></ul></div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    """
-
-    rows = _parse_list_html(html, doc_type="all")
-    doc_types = {r["doc_type"] for r in rows}
-    assert doc_types == {"statement", "conference", "minutes"}
-
-    dates = {r["date"] for r in rows}
-    assert dates == {"01-14"}
-
-
-def test_parse_list_html_doctype_filter():
-    """doc_type 필터 시 해당 유형 행만 반환되는지 검증."""
-    from bokdata.monetary_policy.fetcher import _parse_list_html
-
-    html = """
-    <table>
-      <thead>
-        <tr><th>날짜</th><th>결정문</th><th>기자간담회</th><th>의사록</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">03월 14일(목)</th>
-          <td><div class="fileGoupBox"><ul><li>
+    <table><tbody>
+      <tr>
+        <th scope="row">01월 14일(금)
+          <div class="fileGoupBox"><ul><li>
             <a href="?atchFileId=AAA&fileSn=0" title="결정문.pdf">결정문.pdf</a>
-          </li></ul></div></td>
-          <td></td>
-          <td><div class="fileGoupBox"><ul><li>
-            <a href="?atchFileId=CCC&fileSn=0" title="의사록.pdf">의사록.pdf</a>
-          </li></ul></div></td>
-        </tr>
-      </tbody>
-    </table>
+          </li></ul></div>
+        </th>
+      </tr>
+    </tbody></table>
     """
+    rows = _parse_list_html(html, doc_type="statement")
+    assert rows[0]["date"] == "01-14"
 
+
+def test_parse_list_html_doctype_uses_param():
+    """doc_type 은 mtgSe URL 파라미터(전달값)를 그대로 사용한다."""
+    from bokdata.monetary_policy.fetcher import _parse_list_html
+
+    html = """
+    <table><tbody>
+      <tr>
+        <th scope="row">03월 14일(목)</th>
+        <td><div class="fileGoupBox"><ul><li>
+          <a href="?atchFileId=AAA&fileSn=0" title="의사록.pdf">의사록.pdf</a>
+        </li></ul></div></td>
+      </tr>
+    </tbody></table>
+    """
     rows = _parse_list_html(html, doc_type="minutes")
-    assert all(r["doc_type"] == "minutes" for r in rows)
     assert len(rows) == 1
+    assert rows[0]["doc_type"] == "minutes"
+    assert rows[0]["date"] == "03-14"
+
+
+def test_date_fallback_to_any_cell():
+    """th[scope="row"] 에 날짜 없으면 다른 셀에서 탐색한다."""
+    from bokdata.monetary_policy.fetcher import _parse_list_html
+
+    html = """
+    <table><tbody>
+      <tr>
+        <th scope="row">
+          <div class="fileGoupBox"><ul><li>
+            <a href="?atchFileId=BBB&fileSn=0" title="기자간담회.pdf">기자간담회.pdf</a>
+          </li></ul></div>
+        </th>
+        <td>05월 29일(목) 관련 회의록</td>
+      </tr>
+    </tbody></table>
+    """
+    rows = _parse_list_html(html, doc_type="conference")
+    assert rows[0]["date"] == "05-29"
+    assert rows[0]["doc_type"] == "conference"
