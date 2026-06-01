@@ -68,7 +68,6 @@ class MonetaryPolicy:
                             {
                                 "year": year,
                                 "date": row["date"],
-                                "title": row["title"],
                                 "doc_type": row["doc_type"],
                                 "filename": f["filename"],
                                 "atch_file_id": f["atch_file_id"],
